@@ -65,5 +65,5 @@ EOF
 cat deploy-files/node-exporter/application.yaml
 
 echo "copying default values"
-cp -v deploy-templates/node-exporter-default-values.yaml deploy-files/node-exporter/default-values.yaml
-cp -v deploy-templates/node-exporter-$cluster_role-values.yaml deploy-files/node-exporter/$cluster_role-values.yaml
+cp -v deploy-templates/default-values.yaml deploy-files/node-exporter/default-values.yaml
+cp -v deploy-templates/$cluster_role-values.yaml deploy-files/node-exporter/$cluster_role-values.yaml

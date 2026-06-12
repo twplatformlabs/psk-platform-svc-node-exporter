@@ -16,6 +16,7 @@ trivyScan "prometheus/prometheus-node-exporter" "prometheus-node-exporter" "$nod
 echo "Application resource and configuration files for node-exporter"
 echo "node-exporter chart version: $node_exporter_chart_version"
 echo "creating deploy-files directory for all the node-exporter files that will written to psk-platform-control-plane-configuration repository"
+mkdir depoy-files
 mkdir deploy-files/node-exporter
 
 # generate application.yaml for both Applications then stage the files for writing to the app-of-app config repo

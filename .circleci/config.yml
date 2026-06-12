@@ -58,23 +58,23 @@ jobs:
           destination: "roles/<<parameters.cluster-role>>/node-exporter"
           repository-url: *config-repo
 
-  # functional-tests:
-  #   docker:
-  #     - image: *executor-image
-  #   parameters:
-  #     cluster:
-  #       description: cluster to test
-  #       type: string
-  #     cluster-role:
-  #       description: cluster role to be tested
-  #       type: string
-  #   steps:
-  #     - checkout
-  #     - set-environment:
-  #         cluster: << parameters.cluster >>
-  #     - run:
-  #         name: run integration test of node-exporter
-  #         command: bash scripts/integration_tests.sh << parameters.cluster >> << parameters.cluster-role >>
+  functional-tests:
+    docker:
+      - image: *executor-image
+    parameters:
+      cluster:
+        description: cluster to test
+        type: string
+      cluster-role:
+        description: cluster role to be tested
+        type: string
+    steps:
+      - checkout
+      - set-environment:
+          cluster: << parameters.cluster >>
+      - run:
+          name: run integration test of node-exporter
+          command: bash scripts/integration_tests.sh << parameters.cluster >> << parameters.cluster-role >>
 
 workflows:
 
@@ -89,14 +89,14 @@ workflows:
           cluster-role: sandbox
           filters: *on-push-main
 
-      # - functional-tests:
-      #     name: test sandbox clusters
-      #     context: *context
-      #     cluster: sbx-i01-aws-us-east-1
-      #     cluster-role: sandbox
-      #     requires:
-      #       - update sandbox configuration
-      #     filters: *on-push-main
+      - functional-tests:
+          name: test sandbox clusters
+          context: *context
+          cluster: sbx-i01-aws-us-east-1
+          cluster-role: sandbox
+          requires:
+            - update sandbox configuration
+          filters: *on-push-main
 
   # deploy production role configuration:
   #   jobs:

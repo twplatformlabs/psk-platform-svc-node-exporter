@@ -3,7 +3,7 @@ set -euo pipefail
 source bash-functions.sh
 
 # the argocd core reconciliation loop runs every 3min
-#sleep 240
+sleep 240
 
 cluster=$1
 cluster_role=$2

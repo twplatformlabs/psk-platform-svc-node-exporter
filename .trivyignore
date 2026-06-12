@@ -1,0 +1,11 @@
+# external registry is allowed
+AVD-KSV-0125
+
+# needed by node-exporter
+AVD-KSV-0003
+AVD-KSV-0004
+AVD-KSV-0009
+AVD-KSV-0010
+AVD-KSV-0023
+AVD-KSV-0106
+AVD-KSV-0121

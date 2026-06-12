@@ -1,0 +1,154 @@
+version: 2.1
+
+orbs:
+  kube: twdps/kube-ops@2.1.0
+  op: twdps/onepassword@3.0.0
+  do: twdps/pipeline-events@5.4.0
+
+globals:
+  - &context platform
+  - &executor-image ghcr.io/twplatformlabs/circleci-eks-ops:alpine-2026.05
+  - &config-repo twplatformlabs/psk-aws-control-plane-configuration
+
+on-push-main: &on-push-main
+  branches:
+    only: /main/
+  tags:
+    ignore: /.*/
+
+on-tag-main: &on-tag-main
+  branches:
+    ignore: /.*/
+  tags:
+    only: /.*/
+
+commands:
+
+  set-environment:
+    description: generate environment credentials and configuration from templates
+    parameters:
+      cluster:
+        description: access cluster for testing
+        type: string
+    steps:
+      - op/env:
+          env-file: op.<< parameters.cluster >>.env
+      - kube/op-kubeconfig:
+          op-value: platform/<< parameters.cluster>>/kubeconfig-base64
+      - do/bash-functions
+
+jobs:
+
+  update metrics-server deployment configuration:
+    docker:
+      - image: *executor-image
+    parameters:
+      cluster-role:
+        description: cluster role to be updated
+        type: string
+    steps:
+      - checkout
+      - op/env
+      - do/bash-functions
+      - run:
+          name: generate application resource for role
+          command: bash scripts/generate_application_resource.sh << parameters.cluster-role >>
+      - kube/write-to-github:
+          source: deploy-files/*
+          destination: "roles/<<parameters.cluster-role>>/node-exporter"
+          repository-url: *config-repo
+
+  # functional-tests:
+  #   docker:
+  #     - image: *executor-image
+  #   parameters:
+  #     cluster:
+  #       description: cluster to test
+  #       type: string
+  #     cluster-role:
+  #       description: cluster role to be tested
+  #       type: string
+  #   steps:
+  #     - checkout
+  #     - set-environment:
+  #         cluster: << parameters.cluster >>
+  #     - run:
+  #         name: run integration test of metrics-server
+  #         command: bash scripts/integration_tests.sh << parameters.cluster >> << parameters.cluster-role >>
+
+workflows:
+
+  deploy sandbox role configuration:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+    jobs:
+      - update node-exporter deployment configuration:
+          name: update sandbox configuration
+          context: *context
+          cluster-role: sandbox
+          filters: *on-push-main
+
+      # - functional-tests:
+      #     name: test sandbox clusters
+      #     context: *context
+      #     cluster: sbx-i01-aws-us-east-1
+      #     cluster-role: sandbox
+      #     requires:
+      #       - update sandbox configuration
+      #     filters: *on-push-main
+
+  # deploy production role configuration:
+  #   jobs:
+  #     - update metrics-server deployment configuration:
+  #         name: update production configuration
+  #         context: *context
+  #         cluster-role: production
+  #         filters: *on-tag-main
+
+  #     - functional-tests:
+  #         name: test production clusters
+  #         context: *context
+  #         cluster: prod-i01-aws-us-east-2
+  #         cluster-role: production
+  #         requires:
+  #           - update production configuration
+  #         filters: *on-tag-main
+
+  #     - do/gh-release:
+  #         name: generate release notes
+  #         context: *context
+  #         notes-from-file: release.md
+  #         include-commit-msg: true
+  #         before-release:
+  #           - op/env:
+  #               env-file: op.prod-i01-aws-us-east-2.env
+  #         requires:
+  #           - test production clusters
+  #         filters: *on-tag-main
+
+  #     - do/schedule-pipeline:
+  #         name: schedule nightly integration tests
+  #         context: *context
+  #         scheduled-pipeline-name: nightly metrics-server functional test
+  #         scheduled-pipeline-description: |
+  #           Automatically triggers nightly run of functional-tests job
+  #         hours-of-day: "[1]"
+  #         days-of-week: "[\"SUN\"]"
+  #         before-schedule:
+  #           - op/env:
+  #               env-file: op.prod-i01-aws-us-east-2.env
+  #         filters: *on-tag-main
+
+  # run nightly integration test:
+  #   when:
+  #     equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+  #   jobs:
+  #     - functional-tests:
+  #         name: nightly sbx-i01-aws-us-east-1 functional test
+  #         cluster: sbx-i01-aws-us-east-1
+  #         context: *context
+  #     - functional-tests:
+  #         name: nightly prod-i01-aws-us-east-2 functional test
+  #         cluster: prod-i01-aws-us-east-2
+  #         context: *context

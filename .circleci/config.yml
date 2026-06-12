@@ -39,7 +39,7 @@ commands:
 
 jobs:
 
-  update metrics-server deployment configuration:
+  update node-exporter deployment configuration:
     docker:
       - image: *executor-image
     parameters:
@@ -73,7 +73,7 @@ jobs:
   #     - set-environment:
   #         cluster: << parameters.cluster >>
   #     - run:
-  #         name: run integration test of metrics-server
+  #         name: run integration test of node-exporter
   #         command: bash scripts/integration_tests.sh << parameters.cluster >> << parameters.cluster-role >>
 
 workflows:
@@ -100,7 +100,7 @@ workflows:
 
   # deploy production role configuration:
   #   jobs:
-  #     - update metrics-server deployment configuration:
+  #     - update node-exporter deployment configuration:
   #         name: update production configuration
   #         context: *context
   #         cluster-role: production
@@ -130,7 +130,7 @@ workflows:
   #     - do/schedule-pipeline:
   #         name: schedule nightly integration tests
   #         context: *context
-  #         scheduled-pipeline-name: nightly metrics-server functional test
+  #         scheduled-pipeline-name: nightly node-exporter functional test
   #         scheduled-pipeline-description: |
   #           Automatically triggers nightly run of functional-tests job
   #         hours-of-day: "[1]"

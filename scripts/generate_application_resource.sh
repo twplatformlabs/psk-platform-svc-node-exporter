@@ -17,11 +17,10 @@ echo "Application resource and configuration files for node-exporter"
 echo "node-exporter chart version: $node_exporter_chart_version"
 echo "creating deploy-files directory for all the node-exporter files that will written to psk-platform-control-plane-configuration repository"
 mkdir deploy-files
-mkdir deploy-files/node-exporter
 
 # generate application.yaml for both Applications then stage the files for writing to the app-of-app config repo
 echo "generating node-exporter application.yaml"
-cat <<EOF > deploy-files/node-exporter/application.yaml
+cat <<EOF > deploy-files/application.yaml
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -62,8 +61,8 @@ spec:
         factor: 2
         maxDuration: 5m
 EOF
-cat deploy-files/node-exporter/application.yaml
+cat deploy-files/application.yaml
 
 echo "copying default values"
-cp -v deploy-templates/default-values.yaml deploy-files/node-exporter/default-values.yaml
-cp -v deploy-templates/$cluster_role-values.yaml deploy-files/node-exporter/$cluster_role-values.yaml
+cp -v deploy-templates/default-values.yaml deploy-files/default-values.yaml
+cp -v deploy-templates/$cluster_role-values.yaml deploy-files/$cluster_role-values.yaml

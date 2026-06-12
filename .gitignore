@@ -1,3 +1,4 @@
 kubeconfig
 deploy-templates/application.yaml
 bash-functions.sh
+test/

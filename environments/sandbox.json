@@ -1,4 +1,4 @@
 {
-  "node_exporter_chart_version": "4.55.0",
+  "node_exporter_chart_version": "4.56.1",
   "argocd_namespace": "psk-system"
 }
